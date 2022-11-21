@@ -38,7 +38,7 @@ payload]]></ee:set-payload>
 	</flow>
 	<flow name="Foe-each-demo" doc:id="e956546e-03d6-441d-859f-e3dce156f19b" >
 		<http:listener doc:name="Listener" doc:id="bd7ec70f-4b3c-43c9-86d6-357198f26d22" config-ref="HTTP_Listener_config" path="foreach"/>
-		<logger level="INFO" doc:name="Logger" doc:id="d2bfb7e2-2abc-4067-bd58-44ba85eaaadd" message="--------------- Start of the flow ---------------------"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d2bfb7e2-2abc-4067-bd58-44ba85eaaadd" message="---------------  of tBeginninghe flow ---------------------"/>
 		<db:select doc:name="Select" doc:id="2769c931-5666-43fa-a795-a59f06cf45e4" config-ref="Database_Config1">
 			<db:sql ><![CDATA[select * from emp]]></db:sql>
 		</db:select>
