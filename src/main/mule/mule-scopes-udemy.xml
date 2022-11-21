@@ -22,7 +22,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	</sub-flow>
 	<flow name="mule-scopes-udemyFlow" doc:id="9d01383d-2284-4ede-ba47-acbf433fd0d2" initialState="stopped">
 		<http:listener doc:name="Listener" doc:id="10cac017-f4d6-48c7-a5ad-35976321536e" path="mulescopes" config-ref="HTTP_Listener_config" doc:description="Target Payload - making use of this to save the pre-existing payload before the DB call. "/>
-		<logger level="INFO" doc:name="Logger" doc:id="7b87afb3-9c55-41d2-88e5-ea9192a2393c" message="****************** Start -------------------------"/>
+		<logger level="INFO" doc:name="Logger" doc:id="7b87afb3-9c55-41d2-88e5-ea9192a2393c" message="****************** Start ***************"/>
 		<set-payload value="#['Initial Payload']" doc:name="Set Payload" doc:id="f6440c3b-f024-4827-831a-ddf244b781c1" />
 		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="56e1c461-dd41-4a22-92ce-7018b89590ee" variableName="initialPayload"/>
 		<flow-ref doc:name="selectDBFlow" doc:id="dcb4d149-22bb-4d83-98c5-9f2275e9c7a1" name="selectDBFlow" />
