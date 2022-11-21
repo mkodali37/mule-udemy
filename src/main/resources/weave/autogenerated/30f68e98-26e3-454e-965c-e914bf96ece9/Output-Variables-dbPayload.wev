@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_30f68e98_26e3_454e_965c_e914bf96ece9_Output_Variables_dbPayload = Array<{|  empid: Number,   name?: String,   salary?: Number,   dep_id?: Number|}>
+
