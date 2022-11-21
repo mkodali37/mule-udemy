@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="66ed9cd7-a3af-4faa-b6e5-373ff49a246a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="e88e812a-6dee-47c9-90e6-ab5541e3d451" >
+		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training"/>
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="498d77dc-db13-4a0c-b783-2e019b0d8170" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Sriram^123US" database="mysql" />
+	</db:config>
+	<sub-flow name="selectDBFlow" doc:id="30f68e98-26e3-454e-965c-e914bf96ece9" >
+		<db:select doc:name="Select" doc:id="015fa219-4dde-402a-9efd-38c3ccd0bd8f" config-ref="Database_Config1" target="dbPayload">
+			<db:sql><![CDATA[select * from emp]]></db:sql>
+		</db:select>
+	</sub-flow>
+	<flow name="mule-scopes-udemyFlow" doc:id="9d01383d-2284-4ede-ba47-acbf433fd0d2" initialState="stopped">
+		<http:listener doc:name="Listener" doc:id="10cac017-f4d6-48c7-a5ad-35976321536e" path="mulescopes" config-ref="HTTP_Listener_config" doc:description="Target Payload - making use of this to save the pre-existing payload before the DB call. "/>
+		<logger level="INFO" doc:name="Logger" doc:id="7b87afb3-9c55-41d2-88e5-ea9192a2393c" message="****************** Start ***************"/>
+		<set-payload value="#['Initial Payload']" doc:name="Set Payload" doc:id="f6440c3b-f024-4827-831a-ddf244b781c1" />
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="56e1c461-dd41-4a22-92ce-7018b89590ee" variableName="initialPayload"/>
+		<flow-ref doc:name="selectDBFlow" doc:id="dcb4d149-22bb-4d83-98c5-9f2275e9c7a1" name="selectDBFlow" />
+		<ee:transform doc:name="Transform Message" doc:id="b59f56cb-230e-4c8e-ba90-493286bca9bf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ab0f71dd-23f3-4cd1-93c3-20b25ddd1148" message="#[vars.dbPayload]"/>
+	</flow>
+	<flow name="Foe-each-demo" doc:id="e956546e-03d6-441d-859f-e3dce156f19b" >
+		<http:listener doc:name="Listener" doc:id="bd7ec70f-4b3c-43c9-86d6-357198f26d22" config-ref="HTTP_Listener_config" path="foreach"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d2bfb7e2-2abc-4067-bd58-44ba85eaaadd" message="*************** Start of the flow ******************"/>
+		<db:select doc:name="Select" doc:id="2769c931-5666-43fa-a795-a59f06cf45e4" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select * from emp]]></db:sql>
+		</db:select>
+		<set-variable value="#[[]]" doc:name="Set Variable" doc:id="bb1f2418-87d1-45f3-a0f7-fa32304b8eb8" variableName="empList"/>
+		<foreach doc:name="For Each" doc:id="5997d234-204b-4900-82e1-6beee00e8e30" collection="#[payload]">
+			<logger level="INFO" doc:name="Logger" doc:id="89bf2e4f-2c84-4726-b11b-097e5edcdc6a" message="#[payload]"/>
+			<ee:transform doc:name="accumulating foreach Values" doc:id="b7212cf3-7e08-4c06-a88b-04dfb41cdf89" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="empList" ><![CDATA[%dw 2.0
+output application/java
+---
+flatten(vars.empList ++ [{
+	empid: payload.empid,
+	name: payload.name,
+	salary: payload.salary,
+	dep_id: payload.dep_id
+}])]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<ee:transform doc:name="Transform Message" doc:id="4c1179cc-7d63-46d6-a42e-0daf873e7e9a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="value of counter variable" doc:id="ff902158-515a-4b00-8b40-73b9ec1076c4" message="value of counter variable is : #[vars.counter]"/>
+		</foreach>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="4ff1fd7a-d4ca-4063-9c96-b735a975e541" config-ref="Database_Config1" target="empData">
+			<db:bulk-input-parameters ><![CDATA[#[vars.empList]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[insert into empbackup (empid, name, salary, dep_id) values(:empid, :name, :salary, :dep_id)]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform doc:name="Transform Message" doc:id="51b99a27-ae73-49ce-8aed-3159b8fca1cf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="94b4dfac-f7ea-4abc-bd7d-a02a4b8c571b" message="------ Reached end of the Flow --------------- \n  #[vars.foreachVariable]"/>
+	</flow>
+	<flow name="dataweave-demo" doc:id="5d3f1c92-35cb-4328-8d50-dcb644fd82b6" >
+		<ee:transform doc:name="Transform Message" doc:id="f700df53-617b-4ac2-927a-9cfa89979997" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var coll = [{
+	empname: "vega",
+	empID: "101",
+	empStatus: "true"
+},
+{
+	empname: "vega1",
+	empID: "102",
+	empStatus: "false"
+}
+]
+---
+coll filter($.empStatus == "true") map(item, index) -> {
+	name: item.empname,
+	id: item.empID,
+	status: item.empStatus as Boolean
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
